@@ -1,0 +1,46 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgresql"
+  url        = env("DATABASE_URL")
+  extensions = [postgis]
+}
+
+model User {
+  id    Int     @id @default(autoincrement())
+  email String  @unique
+  name  String?
+
+  created_at DateTime @default(now())
+
+  locations Location[]
+
+  @@map("user")
+}
+
+model Location {
+  id          Int                                  @id @default(autoincrement())
+  userId      Int
+  latitude    Float
+  longitude   Float
+  coordinates Unsupported("geometry(Point, 4326)")
+
+  created_at DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("location")
+}
+
+model Country {
+  id          Int                                         @id @default(autoincrement())
+  name        String                                      @unique
+  coordinates Unsupported("geometry(MultiPolygon, 4326)")
+
+  created_at DateTime @default(now())
+
+  @@map("country")
+}
